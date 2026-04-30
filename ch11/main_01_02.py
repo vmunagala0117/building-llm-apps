@@ -23,7 +23,11 @@ from langgraph.prebuilt import tools_condition
 # Load environment variables
 # -----------------------------------------------------------------------------
 
+
 load_dotenv() #A
+AZURE_OPENAI_BASE_URL = os.getenv("AZURE_OPENAI_BASE_URL")
+AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
+AZURE_OPENAI_MODEL = os.getenv("AZURE_OPENAI_MODEL", "gpt-5.4-mini")
 #A load the environment variables from the .env 
 
 # -----------------------------------------------------------------------------
@@ -59,8 +63,8 @@ _ti_vectorstore_client: Chroma | None = None #G
 def get_travel_info_vectorstore() -> Chroma: #H
     global _ti_vectorstore_client
     if _ti_vectorstore_client is None:
-        if not os.environ.get("OPENAI_API_KEY"):
-            raise RuntimeError("Set the OPENAI_API_KEY env variable and re-run.")
+        if not AZURE_OPENAI_API_KEY:
+            raise RuntimeError("Set AZURE_OPENAI_API_KEY (or OPENAI_API_KEY) in .env and re-run.")
         _ti_vectorstore_client = asyncio.run(build_vectorstore(UK_DESTINATIONS))
     return _ti_vectorstore_client #I
 
@@ -101,7 +105,9 @@ def search_travel_info(query: str) -> str: #B
 # ----------------------------------------------------------------------------
 TOOLS = [search_travel_info] #A
 
-llm_model = ChatOpenAI(model="gpt-5-mini", #B
+llm_model = ChatOpenAI(model=AZURE_OPENAI_MODEL, #B
+                       base_url=AZURE_OPENAI_BASE_URL,
+                       api_key=AZURE_OPENAI_API_KEY,
                        use_responses_api=True) #B
 llm_with_tools = llm_model.bind_tools(TOOLS) #C
 

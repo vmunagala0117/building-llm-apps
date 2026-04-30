@@ -4,11 +4,14 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-openai_api_key = os.getenv("OPENAI_API_KEY")
+AZURE_OPENAI_BASE_URL = os.getenv("AZURE_OPENAI_BASE_URL")
+AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
+AZURE_OPENAI_MODEL = os.getenv("AZURE_OPENAI_MODEL", "gpt-5.4-mini")
 
 def get_llm():
-    return ChatOpenAI(openai_api_key=openai_api_key,
-                 model_name="gpt-5-nano")
+    return ChatOpenAI(model=AZURE_OPENAI_MODEL,
+                 base_url=AZURE_OPENAI_BASE_URL,
+                 api_key=AZURE_OPENAI_API_KEY)
 
 # Define typed dictionaries for state handling
 class AssistantInfo(TypedDict):
